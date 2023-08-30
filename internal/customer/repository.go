@@ -1,12 +1,10 @@
 package customer
 
 import (
-	"database/sql"
-	"log"
 	"time"
 )
 
-func Create(db *sql.DB, logger *log.Logger, name string, email *string, address string, billableCurrency string) (Customer, error) {
+func (c CustomerStruct) create(name string, email *string, address string, billableCurrency string) (Customer, error) {
 	var customer Customer
 
 	// Prepare the query
@@ -15,9 +13,9 @@ func Create(db *sql.DB, logger *log.Logger, name string, email *string, address 
 	          VALUES ($1, $2, $3, $4, $5, $6) RETURNING customer_id;`
 
 	// Execute the query
-	err := db.QueryRow(query, name, email, address, billableCurrency, time.Now(), time.Now()).Scan(&customer.ID)
+	err := c.DB.QueryRow(query, name, email, address, billableCurrency, time.Now(), time.Now()).Scan(&customer.ID)
 	if err != nil {
-		logger.Println("Error inserting into database:", err)
+		c.Logger.Println("Error inserting into database:", err)
 		return customer, err
 	}
 
@@ -29,7 +27,7 @@ func Create(db *sql.DB, logger *log.Logger, name string, email *string, address 
 	customer.AddedDate = time.Now()
 	customer.LastModifiedDate = time.Now()
 
-	logger.Println("Successfully created customer:", customer)
+	c.Logger.Println("Successfully created customer:", customer)
 
 	return customer, nil
 }

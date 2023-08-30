@@ -1,8 +1,8 @@
 package customer
 
 import (
+	"bernardolsp/invoice-generator/helpers"
 	"database/sql"
-	"encoding/json"
 	"log"
 	"net/http"
 )
@@ -16,37 +16,32 @@ func (c CustomerStruct) Handle(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		handleGet(w, r)
 	} else if r.Method == http.MethodPost {
-		handlePost(c.DB, c.Logger, w, r)
+		c.handlePost(c.DB, c.Logger, w, r)
 	}
 }
 
-func handlePost(db *sql.DB, logger *log.Logger, w http.ResponseWriter, r *http.Request) {
+func (c CustomerStruct) handlePost(db *sql.DB, logger *log.Logger, w http.ResponseWriter, r *http.Request) {
 	var customer Customer
 
-	// Decode the incoming Customer json
-	err := json.NewDecoder(r.Body).Decode(&customer)
-	if err != nil {
+	if err := helpers.DecodeJSONBody(r, &customer); err != nil {
 		logger.Println("Error decoding JSON:", err)
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
-	createdCustomer, err := Create(db, logger, customer.Name, customer.Email, customer.Address, customer.BillableCurrency)
+	createdCustomer, err := c.create(customer.Name, customer.Email, customer.Address, customer.BillableCurrency)
 	if err != nil {
 		http.Error(w, "Failed to create customer", http.StatusInternalServerError)
 		return
 	}
 
-	response, err := json.Marshal(createdCustomer)
-	if err != nil {
+	if err := helpers.EncodeJSONResponse(w, createdCustomer); err != nil {
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(response)
 }
 
 func handleGet(w http.ResponseWriter, r *http.Request) {
-	// ...
+	// Get customers from the database
+
 }
