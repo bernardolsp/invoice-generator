@@ -15,6 +15,6 @@ type Customer struct {
 	LastModifiedDate time.Time `json:"last_modified_date"`
 }
 
-func String(c Customer) string {
-	return fmt.Sprintf("Customer %d: %s", c.ID, c.Name)
+func (c Customer) String() string {
+	return fmt.Sprintf("Customer %d: %s, %s", c.ID, c.Name, *c.Email)
 }
