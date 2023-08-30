@@ -1,6 +1,9 @@
 package beneficiary
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type Beneficiary struct {
 	ID               int
@@ -10,4 +13,8 @@ type Beneficiary struct {
 	Currency         string
 	AddedDate        time.Time
 	LastModifiedDate time.Time
+}
+
+func (b Beneficiary) String() string {
+	return fmt.Sprintf("Beneficiary %d: %s, %s", b.ID, b.Name, *b.Email)
 }
